@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cute Cafe Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <div id="money-counter">💰 $<span id="money">0.00</span></div>
+    <button id="pause-btn" title="Pause Game">⏸️</button>
+    <h1>☕ Cute Cafe Game 🍰</h1>
+    <div id="game" class="split-screen">
+      <div class="left-side">
+        <div id="customer-area">
+          <h2>Customer</h2>
+          <div class="customer-character">
+            <span id="customer-emoji">🐰</span>
+            <div class="speech-bubble" id="customer-bubble">
+              <span id="customer-order"></span>
+            </div>
+          </div>
+          <div id="satisfaction-bar-container">
+            <div id="satisfaction-bar"></div>
+          </div>
+        </div>
+        <div id="menu-area">
+          <h2>Menu</h2>
+          <div id="drink-menu"></div>
+        </div>
+      </div>
+      <div class="right-side">
+        <div id="make-area">
+          <h2>Make a Drink</h2>
+          <form id="make-drink-form">
+            <select id="drink-select"></select>
+            <button type="button" id="start-make-btn">Start Making</button>
+          </form>
+          <div id="make-steps" style="display:none;"></div>
+          <div id="made-drink"></div>
+        </div>
+        <div id="make-pastry-area">
+          <h2>Make a Pastry</h2>
+          <form id="make-pastry-form">
+            <select id="pastry-select"></select>
+            <button type="button" id="start-make-pastry-btn">Start Baking</button>
+          </form>
+          <div id="make-pastry-steps" style="display:none;"></div>
+          <div id="made-pastry"></div>
+        </div>
+        <div id="serve-area">
+          <button id="serve-btn" disabled>Serve Drink</button>
+          <div id="result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
