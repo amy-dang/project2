@@ -30,12 +30,44 @@ h1 {
   gap: 0;
 }
 
-#customer-area, #menu-area, #make-area, #serve-area {
+#customer-area, #menu-area, #make-area, #serve-area, #make-pastry-area {
   background: #fff0f6;
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 0;
   box-shadow: 0 2px 8px #f8bbd0;
+}
+
+#make-pastry-area {
+  background: #fff0f6 !important;
+  border-radius: 12px !important;
+  padding: 10px !important;
+  margin-bottom: 0 !important;
+  margin-top: 16px !important;
+  box-shadow: 0 2px 8px #f8bbd0 !important;
+  border: 2px solid #ffb3c6 !important;
+}
+
+#menu-area {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#drink-menu, #pastry-menu {
+  background: #fff0f6;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 8px #f8bbd0;
+  margin: 0;
+}
+
+#drink-menu {
+  margin-bottom: 0;
+}
+
+#pastry-menu {
+  margin-top: 0;
 }
 
 button, select {
