@@ -11,7 +11,7 @@ const pastries = [
   { name: 'Croissant', emoji: '🥐', ingredients: ['Dough', 'Butter'], price: 2.5 },
   { name: 'Cupcake', emoji: '🧁', ingredients: ['Batter', 'Frosting'], price: 3.0 },
   { name: 'Donut', emoji: '🍩', ingredients: ['Dough', 'Icing'], price: 2.8 },
-  { name: 'Macaron', emoji: '<img src="macaron-removebg.png" alt="Macaron" style="height:1.4em;vertical-align:middle;">', ingredients: ['Almond Flour', 'Filling'], price: 3.2 },
+  { name: 'Macaron', emoji: '<img src="macaron-removebg-preview.png" alt="Macaron" style="height:1.4em;vertical-align:middle;">', ingredients: ['Almond Flour', 'Filling'], price: 3.2 },
 ];
 
 const customerEmojis = ['🐰', '🐱', '🐻', '🦊', '🐥', '🐶', '🦄', '🐧'];
@@ -261,7 +261,7 @@ function showMakePastrySteps(pastry) {
       if (makeStep === makingPastry.ingredients.length) {
         visuals = makingPastry.emoji;
       }
-      processDiv.textContent = visuals;
+      processDiv.innerHTML = visuals;
     }
     stepsDiv.innerHTML = '';
     if (processDiv) stepsDiv.appendChild(processDiv);
@@ -275,29 +275,68 @@ function showMakePastrySteps(pastry) {
         makeStep++;
         showNextPastryStep();
       };
-      // Disable serve pastry button while making
-      document.getElementById('serve-pastry-btn').disabled = true;
     } else {
-      if (processDiv) processDiv.textContent = makingPastry.emoji;
+      if (processDiv) processDiv.innerHTML = visuals;
       stepsDiv.innerHTML += `<span style="color:green;">All ingredients added!</span>`;
-      document.getElementById('made-pastry').textContent = `You made a ${makingPastry.emoji} ${makingPastry.name}!`;
+      document.getElementById('made-pastry').innerHTML = `You made a ${makingPastry.emoji} ${makingPastry.name}!`;
       madeDrink = makingPastry; // Set madeDrink to the pastry for serving
-      document.getElementById('serve-pastry-btn').disabled = false;
+      // Enable the serve-pastry-btn only if the current order is a pastry
+      if (currentOrder && currentOrder.type === 'pastry') {
+        document.getElementById('serve-pastry-btn').disabled = false;
+      }
     }
   }
 }
 
-// Add event listener for Serve Pastry button
-// This is a copy of the serve drink logic, but for pastries
-// It only works if the current order is a pastry
+// Always disable serve-pastry-btn for new customers
+const origNewCustomer = newCustomer;
+newCustomer = function() {
+  document.getElementById('serve-pastry-btn').disabled = true;
+  document.getElementById('result-pastry').textContent = '';
+  origNewCustomer();
+};
 
-document.getElementById('serve-pastry-btn').addEventListener('click', function() {
-  if (!madeDrink || !currentOrder || currentOrder.type !== 'pastry') return;
+// Add event listener for serve-pastry-btn if not already present
+if (!window._servePastryBtnListenerAdded) {
+  document.getElementById('serve-pastry-btn').addEventListener('click', function() {
+    if (!madeDrink || !currentOrder || currentOrder.type !== 'pastry') return;
+    stopSatisfactionBar();
+    let correct = false;
+    if (madeDrink.name === currentOrder.name) correct = true;
+    if (correct) {
+      document.getElementById('result-pastry').textContent = 'Yay! The customer is happy! 🎉';
+      const happyResponses = [
+        "Yay! Thank you so much! 🥰",
+        "This is perfect! You're the best! 😋",
+        "Delicious! I'll come back soon! 🧁",
+        "So cute and tasty! Thank you! 💖",
+        "You made my day! ☀️"
+      ];
+      const response = happyResponses[Math.floor(Math.random() * happyResponses.length)];
+      document.getElementById('customer-order').innerHTML = `<span style='color:#ff8fab;'>${response}</span>`;
+      money += currentOrder.price;
+      document.getElementById('money').textContent = money.toFixed(2);
+    } else {
+      document.getElementById('result-pastry').textContent = 'Oops! That wasn\'t their order. 😢';
+    }
+    document.getElementById('made-drink').textContent = '';
+    document.getElementById('made-pastry').textContent = '';
+    document.getElementById('make-steps').style.display = 'none';
+    document.getElementById('make-pastry-steps').style.display = 'none';
+    document.getElementById('serve-pastry-btn').disabled = true;
+    setTimeout(newCustomer, 2000);
+  });
+  window._servePastryBtnListenerAdded = true;
+}
+
+// Add event listener for serve-btn to serve drinks only
+document.getElementById('serve-btn').addEventListener('click', function() {
+  if (!madeDrink || !currentOrder || currentOrder.type !== 'drink') return;
   stopSatisfactionBar();
   let correct = false;
   if (madeDrink.name === currentOrder.name) correct = true;
   if (correct) {
-    document.getElementById('result-pastry').textContent = 'Yay! The customer is happy! 🎉';
+    document.getElementById('result').textContent = 'Yay! The customer is happy! 🎉';
     const happyResponses = [
       "Yay! Thank you so much! 🥰",
       "This is perfect! You're the best! 😋",
@@ -310,27 +349,15 @@ document.getElementById('serve-pastry-btn').addEventListener('click', function()
     money += currentOrder.price;
     document.getElementById('money').textContent = money.toFixed(2);
   } else {
-    document.getElementById('result-pastry').textContent = 'Oops! That wasn\'t their order. 😢';
+    document.getElementById('result').textContent = 'Oops! That wasn\'t their order. 😢';
   }
   document.getElementById('made-drink').textContent = '';
   document.getElementById('made-pastry').textContent = '';
   document.getElementById('make-steps').style.display = 'none';
   document.getElementById('make-pastry-steps').style.display = 'none';
+  document.getElementById('serve-btn').disabled = true;
   setTimeout(newCustomer, 2000);
 });
-
-// Enable/disable serve-pastry-btn when pastry is made
-function enableServePastryButton(enable) {
-  document.getElementById('serve-pastry-btn').disabled = !enable;
-}
-
-// When a new customer arrives, disable the serve pastry button
-const origNewCustomer = newCustomer;
-newCustomer = function() {
-  enableServePastryButton(false);
-  document.getElementById('result-pastry').textContent = '';
-  origNewCustomer();
-};
 
 // DEBUG: Test pickRandomOrder 100 times to see if pastries are picked
 (function testRandomOrders() {

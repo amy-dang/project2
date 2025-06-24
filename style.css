@@ -48,7 +48,7 @@ h1 {
   border: 2px solid #ffb3c6 !important;
 }
 
-#serve-pastry-area {
+#serve-area, #serve-pastry-area {
   background: #fff0f6;
   border-radius: 12px;
   padding: 10px;
