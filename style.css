@@ -30,7 +30,7 @@ h1 {
   gap: 0;
 }
 
-#customer-area, #menu-area, #make-area, #serve-area, #make-pastry-area {
+#customer-area, #menu-area, #make-area, #serve-area, #make-pastry-area, #serve-pastry-area {
   background: #fff0f6;
   border-radius: 12px;
   padding: 10px;
@@ -46,6 +46,16 @@ h1 {
   margin-top: 16px !important;
   box-shadow: 0 2px 8px #f8bbd0 !important;
   border: 2px solid #ffb3c6 !important;
+}
+
+#serve-pastry-area {
+  background: #fff0f6;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 0;
+  margin-top: 16px;
+  box-shadow: 0 2px 8px #f8bbd0;
+  border: 2px solid #ffb3c6;
 }
 
 #menu-area {
