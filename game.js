@@ -231,6 +231,7 @@ function showNextStep() {
     madeDrink = makingDrink; // Set the madeDrink to the drink that was just made
     document.getElementById('made-drink').innerHTML = `You made a ${makingDrink.name === 'Strawberry Smoothie' ? '<img src=\'strawberry_smoothie-removebg-preview.png\' alt=\'Strawberry Smoothie\' style=\'height:1.4em;vertical-align:middle;\'>' : makingDrink.name === 'Hot Chocolate' ? '<img src=\'image-removebg-preview.png\' alt=\'Hot Chocolate\' style=\'height:1.4em;vertical-align:middle;\'>' : makingDrink.name === 'Latte' ? '<img src=\'latte-removebg-preview.png\' alt=\'Latte\' style=\'height:1.4em;vertical-align:middle;\'>' : makingDrink.emoji} ${makingDrink.name}!`;
     document.getElementById('serve-btn').disabled = false;
+    document.getElementById('serve-pastry-btn').disabled = false; // Always enable for testing
     // Do not hide make-steps here; keep it open until served
   }
 }
@@ -249,8 +250,8 @@ function showMakePastrySteps(pastry) {
   stepsDiv.appendChild(processDiv);
   showNextPastryStep();
   function showNextPastryStep() {
+    let visuals = '🍽️';
     if (processDiv && makingPastry) {
-      let visuals = '🍽️';
       if (makeStep > 0) {
         visuals = '🍽️';
         for (let i = 0; i < makeStep; i++) {
@@ -280,31 +281,56 @@ function showMakePastrySteps(pastry) {
       stepsDiv.innerHTML += `<span style="color:green;">All ingredients added!</span>`;
       document.getElementById('made-pastry').innerHTML = `You made a ${makingPastry.emoji} ${makingPastry.name}!`;
       madeDrink = makingPastry; // Set madeDrink to the pastry for serving
-      // Enable the serve-pastry-btn only if the current order is a pastry
-      if (currentOrder && currentOrder.type === 'pastry') {
-        document.getElementById('serve-pastry-btn').disabled = false;
-      }
+      document.getElementById('serve-pastry-btn').removeAttribute('disabled'); // Always enable after pastry is made
+      console.log('[DEBUG] serve-pastry-btn enabled at', new Date().toLocaleTimeString());
     }
   }
 }
 
-// Always disable serve-pastry-btn for new customers
-const origNewCustomer = newCustomer;
-newCustomer = function() {
-  document.getElementById('serve-pastry-btn').disabled = true;
-  document.getElementById('result-pastry').textContent = '';
-  origNewCustomer();
-};
+// Move all event listener and initialization code inside DOMContentLoaded
 
-// Add event listener for serve-pastry-btn if not already present
-if (!window._servePastryBtnListenerAdded) {
-  document.getElementById('serve-pastry-btn').addEventListener('click', function() {
-    if (!madeDrink || !currentOrder || currentOrder.type !== 'pastry') return;
+document.addEventListener('DOMContentLoaded', function() {
+  // Add event listener for serve-pastry-btn if not already present
+  if (!window._servePastryBtnListenerAdded) {
+    document.getElementById('serve-pastry-btn').addEventListener('click', function() {
+      if (!madeDrink || !currentOrder || currentOrder.type !== 'pastry') return;
+      stopSatisfactionBar();
+      let correct = false;
+      if (madeDrink.name === currentOrder.name) correct = true;
+      if (correct) {
+        document.getElementById('result-pastry').textContent = 'Yay! The customer is happy! 🎉';
+        const happyResponses = [
+          "Yay! Thank you so much! 🥰",
+          "This is perfect! You're the best! 😋",
+          "Delicious! I'll come back soon! 🧁",
+          "So cute and tasty! Thank you! 💖",
+          "You made my day! ☀️"
+        ];
+        const response = happyResponses[Math.floor(Math.random() * happyResponses.length)];
+        document.getElementById('customer-order').innerHTML = `<span style='color:#ff8fab;'>${response}</span>`;
+        money += currentOrder.price;
+        document.getElementById('money').textContent = money.toFixed(2);
+      } else {
+        document.getElementById('result-pastry').textContent = 'Oops! That wasn\'t their order. 😢';
+      }
+      document.getElementById('made-drink').textContent = '';
+      document.getElementById('made-pastry').textContent = '';
+      document.getElementById('make-steps').style.display = 'none';
+      document.getElementById('make-pastry-steps').style.display = 'none';
+      document.getElementById('serve-pastry-btn').disabled = true;
+      setTimeout(newCustomer, 2000);
+    });
+    window._servePastryBtnListenerAdded = true;
+  }
+
+  // Add event listener for serve-btn to serve drinks only
+  document.getElementById('serve-btn').addEventListener('click', function() {
+    if (!madeDrink || !currentOrder || currentOrder.type !== 'drink') return;
     stopSatisfactionBar();
     let correct = false;
     if (madeDrink.name === currentOrder.name) correct = true;
     if (correct) {
-      document.getElementById('result-pastry').textContent = 'Yay! The customer is happy! 🎉';
+      document.getElementById('result').textContent = 'Yay! The customer is happy! 🎉';
       const happyResponses = [
         "Yay! Thank you so much! 🥰",
         "This is perfect! You're the best! 😋",
@@ -317,64 +343,71 @@ if (!window._servePastryBtnListenerAdded) {
       money += currentOrder.price;
       document.getElementById('money').textContent = money.toFixed(2);
     } else {
-      document.getElementById('result-pastry').textContent = 'Oops! That wasn\'t their order. 😢';
+      document.getElementById('result').textContent = 'Oops! That wasn\'t their order. 😢';
     }
     document.getElementById('made-drink').textContent = '';
     document.getElementById('made-pastry').textContent = '';
     document.getElementById('make-steps').style.display = 'none';
     document.getElementById('make-pastry-steps').style.display = 'none';
-    document.getElementById('serve-pastry-btn').disabled = true;
+    document.getElementById('serve-btn').disabled = true;
     setTimeout(newCustomer, 2000);
   });
-  window._servePastryBtnListenerAdded = true;
-}
 
-// Add event listener for serve-btn to serve drinks only
-document.getElementById('serve-btn').addEventListener('click', function() {
-  if (!madeDrink || !currentOrder || currentOrder.type !== 'drink') return;
-  stopSatisfactionBar();
-  let correct = false;
-  if (madeDrink.name === currentOrder.name) correct = true;
-  if (correct) {
-    document.getElementById('result').textContent = 'Yay! The customer is happy! 🎉';
-    const happyResponses = [
-      "Yay! Thank you so much! 🥰",
-      "This is perfect! You're the best! 😋",
-      "Delicious! I'll come back soon! 🧁",
-      "So cute and tasty! Thank you! 💖",
-      "You made my day! ☀️"
-    ];
-    const response = happyResponses[Math.floor(Math.random() * happyResponses.length)];
-    document.getElementById('customer-order').innerHTML = `<span style='color:#ff8fab;'>${response}</span>`;
-    money += currentOrder.price;
-    document.getElementById('money').textContent = money.toFixed(2);
-  } else {
-    document.getElementById('result').textContent = 'Oops! That wasn\'t their order. 😢';
-  }
-  document.getElementById('made-drink').textContent = '';
-  document.getElementById('made-pastry').textContent = '';
-  document.getElementById('make-steps').style.display = 'none';
-  document.getElementById('make-pastry-steps').style.display = 'none';
-  document.getElementById('serve-btn').disabled = true;
-  setTimeout(newCustomer, 2000);
+  // Pause button functionality
+  document.getElementById('pause-btn').addEventListener('click', function() {
+    isPaused = !isPaused;
+    this.textContent = isPaused ? '▶️' : '⏸️';
+    this.title = isPaused ? 'Resume Game' : 'Pause Game';
+    if (!isPaused) {
+      startSatisfactionBar(false);
+    }
+  });
+
+  // Start making drink
+  document.getElementById('start-make-btn').addEventListener('click', function() {
+    if (isPaused) return;
+    const idx = document.getElementById('drink-select').value;
+    const drink = drinks[idx];
+    showMakeSteps(drink);
+    document.getElementById('serve-btn').disabled = true;
+    document.getElementById('made-drink').textContent = '';
+  });
+
+  // Start making pastry
+  document.getElementById('start-make-pastry-btn').addEventListener('click', function() {
+    if (isPaused) return;
+    const idx = document.getElementById('pastry-select').value;
+    const pastry = pastries[idx];
+    showMakePastrySteps(pastry);
+    document.getElementById('serve-pastry-btn').disabled = true;
+    document.getElementById('made-pastry').textContent = '';
+  });
+
+  // Always disable serve-pastry-btn for new customers
+  const origNewCustomer = newCustomer;
+  newCustomer = function() {
+    document.getElementById('serve-pastry-btn').disabled = true;
+    document.getElementById('result-pastry').textContent = '';
+    origNewCustomer();
+  };
+
+  // Initialize game
+  showMenu();
+  newCustomer();
+
+  // DEBUG: Test pickRandomOrder 100 times to see if pastries are picked
+  (function testRandomOrders() {
+    let pastryCount = 0;
+    let drinkCount = 0;
+    for (let i = 0; i < 100; i++) {
+      const order = (function() {
+        const allItems = drinks.map(d => ({...d, type: 'drink'})).concat(pastries.map(p => ({...p, type: 'pastry'})));
+        const pick = allItems[Math.floor(Math.random() * allItems.length)];
+        return pick;
+      })();
+      if (order.type === 'pastry') pastryCount++;
+      if (order.type === 'drink') drinkCount++;
+    }
+    console.log('Test: Pastry orders:', pastryCount, 'Drink orders:', drinkCount);
+  })();
 });
-
-// DEBUG: Test pickRandomOrder 100 times to see if pastries are picked
-(function testRandomOrders() {
-  let pastryCount = 0;
-  let drinkCount = 0;
-  for (let i = 0; i < 100; i++) {
-    const order = (function() {
-      const allItems = drinks.map(d => ({...d, type: 'drink'})).concat(pastries.map(p => ({...p, type: 'pastry'})));
-      const pick = allItems[Math.floor(Math.random() * allItems.length)];
-      return pick;
-    })();
-    if (order.type === 'pastry') pastryCount++;
-    if (order.type === 'drink') drinkCount++;
-  }
-  console.log('Test: Pastry orders:', pastryCount, 'Drink orders:', drinkCount);
-})();
-
-// Initialize game
-showMenu();
-newCustomer();
